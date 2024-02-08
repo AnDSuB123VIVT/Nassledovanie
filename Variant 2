@@ -1,0 +1,96 @@
+#include <iostream>
+#include <conio.h>
+using namespace std;
+ 
+class BaseRoom    // базовый класс (кухня тоже комната)
+{
+public:
+  BaseRoom(int square):m_nSquare(square){}  // конструктор
+  BaseRoom(const BaseRoom& baseroom)        // копирующий конструктор
+  {
+    m_nSquare = baseroom.GetSquare();
+  }
+  virtual ~BaseRoom(void){}  // деструктор 
+  int GetSquare(void)const{return m_nSquare;} // возващает значение площади
+protected:
+  int m_nSquare; // свойство 'площадь' общее для всех помещений не важно кухня или спальная комната
+};
+ 
+class LivingRoom : public BaseRoom // класс комнаты наследует интефейс и свойства от базового класса
+{
+public:
+  LivingRoom(int square):BaseRoom(square){} // конструктор
+  virtual ~LivingRoom(void){} // деструктор 
+};
+ 
+class Kitchen : public BaseRoom // класс кухни наследует интефейс и свойства от базового класса
+{
+public:
+  Kitchen(int square):BaseRoom(square){} // конструктор
+  virtual ~Kitchen(void){} // деструктор 
+};
+ 
+class OneRoomApartment // класс однокомнатной квартиры
+{
+public:
+  OneRoomApartment(int floor,Kitchen kitchen,LivingRoom livingRoom) // конструктор
+  :m_nFloor(floor)
+  {
+    FKitchen = new Kitchen(kitchen); // создаем объекты кухня и комната
+    FLivingRoom = new LivingRoom(livingRoom);
+  };
+  friend ostream& operator<<(ostream& os,const OneRoomApartment& apartament) //перегрузка оператора '<<' 
+  {
+    return os << "floor: " << apartament.m_nFloor << endl
+              << "kitchen square: " << apartament.FKitchen->GetSquare() << endl
+              << "livingRoom square: " << apartament.FLivingRoom->GetSquare() << endl;
+  }
+  virtual ~OneRoomApartment(void) // деструктор 
+  {
+    delete FKitchen; // уничтожаем объекты кухня и комната
+    delete FLivingRoom;
+  };
+protected:
+  int m_nFloor;     //свойство 'этаж' 
+  Kitchen* FKitchen;//указатель на объект кухня
+  LivingRoom* FLivingRoom;//указатель на объект комната
+};
+ 
+class ThreeRoomApartament : public OneRoomApartment // класс трехкомнатной квартиры наследник от класса однокомнатной квартиры
+{
+public:
+  ThreeRoomApartament(int floor,Kitchen kitchen,LivingRoom livingRoom1,LivingRoom livingRoom2,LivingRoom livingRoom3)
+  :OneRoomApartment(floor,kitchen,livingRoom1)
+  {
+    FLivingRoom2 = new LivingRoom(livingRoom2);
+    FLivingRoom3 = new LivingRoom(livingRoom3);
+  }
+  ~ThreeRoomApartament(void)
+  {
+    delete FLivingRoom2;
+    delete FLivingRoom3;
+  }
+  friend ostream& operator<<(ostream& os,const ThreeRoomApartament& apartament)
+  {
+    return os << "floor: " << apartament.m_nFloor << endl
+              << "kitchen square: " << apartament.FKitchen->GetSquare() << endl
+              << "livingRoom1 square: " << apartament.FLivingRoom->GetSquare() << endl
+              << "livingRoom2 square: " << apartament.FLivingRoom2->GetSquare() << endl
+              << "livingRoom3 square: " << apartament.FLivingRoom3->GetSquare() << endl;
+  }
+private:
+  LivingRoom* FLivingRoom2;
+  LivingRoom* FLivingRoom3;
+};
+ 
+int main(void)
+{
+  OneRoomApartment OneRoom(5,(Kitchen)25,(LivingRoom)36);
+  cout << OneRoom;
+ 
+  ThreeRoomApartament ThreeRoom(3,(Kitchen)16,(LivingRoom)18,(LivingRoom)28,(LivingRoom)38);
+  cout << ThreeRoom;
+ 
+  getch();
+  return 0;
+}
